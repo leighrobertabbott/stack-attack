@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#102827">
+  <meta name="description" content="Stack your sandwich, dodge the hazards and feed the chef in an endless 3D seaside arcade runner.">
+  <title>Stack Attack! • Tidal Diner</title>
+  <link rel="icon" href="./art/sandwich.webp" type="image/webp">
+  <link rel="preload" as="image" href="./art/stack-attack.webp">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <div class="brand" aria-label="Tidal Diner">
+        <span class="brand-icon"><img src="./art/sandwich.webp" width="40" height="40" alt=""></span>
+        <span>TIDAL <strong>DINER</strong></span>
+      </div>
+      <div class="header-actions">
+        <div class="best" title="Best run on this device"><img class="star" src="./art/gold-star.webp" width="20" height="20" alt=""> BEST <strong id="bestScore">0</strong></div>
+        <button class="icon-btn" id="soundButton" type="button" aria-label="Mute audio" aria-pressed="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path class="sound-wave" d="M15 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="sound-off" d="m15 10 5 5m0-5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" id="topHelp" type="button" aria-label="How to play">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.8" stroke="currentColor" stroke-width="1.8"/><path d="M9.7 9.3a2.3 2.3 0 1 1 3.6 1.9c-.8.6-1.3 1-1.3 2.1m0 3.1v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="game" id="game" data-mode="menu" aria-label="Stack Attack 3D game">
+        <canvas id="world" aria-label="3D sandwich course"></canvas>
+        <div class="game-shade" aria-hidden="true"></div>
+        <div class="rush-glow" aria-hidden="true"></div>
+
+        <div class="hud">
+          <div class="stage-chip">
+            <span class="stage-no" id="stageNumber">01</span>
+            <div><span class="hud-caption">STAGE</span><strong id="stageName">Sunny Shores</strong></div>
+          </div>
+          <div class="progress-chip" aria-label="Stage progress">
+            <div class="progress-track"><div id="progressFill"></div></div>
+            <span id="progressValue">0%</span>
+          </div>
+          <div class="hud-right">
+            <div class="score-chip"><span class="score-icon"><img src="./art/gold-star.webp" width="28" height="28" alt=""></span><div><span class="hud-caption">SCORE</span><strong id="score">0</strong></div></div>
+            <button class="icon-btn pause-btn" id="pauseButton" type="button" aria-label="Pause game"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6v12m6-12v12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></button>
+          </div>
+        </div>
+
+        <div class="intro" id="intro">
+          <h1><img src="./art/stack-attack.webp" width="1120" height="559" alt="Stack Attack!" fetchpriority="high"></h1>
+          <p>Grab every bite you can. Feed the chef.</p>
+          <div class="intro-actions">
+            <button class="action" id="start" type="button">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.3 4.7a1 1 0 0 0-1.5.9v12.8a1 1 0 0 0 1.5.9l10-6.4a1 1 0 0 0 0-1.8z"/></svg>
+              Start Run
+            </button>
+            <button class="course-button" id="chooseCourse" type="button">Choose course</button>
+          </div>
+        </div>
+
+        <aside class="tickets" aria-label="Optional stage goals">
+          <div class="ticket house-ticket" id="orderTicket">
+            <span class="ui-icon" style="--icon-size:27px" aria-hidden="true"><canvas data-icon="order-ticket" width="72" height="72" hidden></canvas><span data-icon-fallback>✓</span></span>
+            <div><strong>House order</strong><div id="orderItems" class="ticket-items"></div></div>
+          </div>
+          <div class="ticket dare-ticket">
+            <span class="dare-mark" aria-hidden="true">!</span>
+            <div><strong>Chef dare</strong><span id="dareName"></span></div>
+          </div>
+        </aside>
+        <button id="flipButton" type="button" class="flip-button" aria-label="Flip the sandwich" hidden>
+          <span class="ui-icon" style="--icon-size:35px" aria-hidden="true"><canvas data-icon="flip" width="72" height="72" hidden></canvas><span data-icon-fallback>↑</span></span><strong>Flip</strong><small id="flipStatus">Ready</small>
+        </button>
+        <div class="run-info">
+          <img class="filling-icon" src="./art/sandwich.webp" width="26" height="26" alt=""><strong id="fillCount">0</strong><span id="fillLabel">fillings</span>
+          <span id="combo" class="combo" hidden></span>
+        </div>
+        <div class="seasonings" id="seasonings" aria-label="Ingredients that affect the chef">
+          <span class="seasoning heat" hidden><span class="ui-icon" style="--icon-size:20px" aria-hidden="true"><canvas id="heatIcon" data-icon="chili" width="72" height="72" hidden></canvas><span data-icon-fallback>🌶</span></span>Heat <strong id="heatCount">0/4</strong></span>
+          <span class="seasoning funk" hidden><span class="ui-icon" style="--icon-size:20px" aria-hidden="true"><canvas id="funkIcon" data-icon="funk" width="72" height="72" hidden></canvas><span data-icon-fallback>!</span></span>Stink <strong id="funkCount">0/3</strong></span>
+        </div>
+        <div class="rush-banner" id="rushBanner" hidden><img src="./art/gold-star.webp" width="28" height="28" alt=""> TOAST RUSH <img src="./art/gold-star.webp" width="28" height="28" alt=""><div><i id="rushFill"></i></div></div>
+        <div class="toast" id="toast" aria-live="polite"></div>
+        <div class="countdown" id="countdown" aria-live="polite" hidden></div>
+
+        <section class="digestion-hud" id="digestionHud" aria-label="Digestion bonus" hidden>
+          <div class="digestion-top">
+            <div class="digest-organ">
+              <strong id="organName">Esophagus</strong>
+              <span class="organ-steps" id="organStep" role="img" aria-label="Chamber 1 of 3" data-step="1"><i></i><i></i><i></i></span>
+            </div>
+            <div class="digest-count"><strong id="morselTotal">0</strong><span>Morsels</span></div>
+            <button id="pauseDigestion" type="button" class="icon-btn digestion-pause" aria-label="Pause bonus"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6v12m6-12v12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></button>
+          </div>
+          <p id="digestionHint" class="digest-hint" aria-live="polite" hidden></p>
+          <div id="digestionWin" class="digest-win" role="status" hidden><strong id="digestionWinPoints"></strong><span>Digestion bonus</span></div>
+        </section>
+
+        <div class="overlay" id="overlay" hidden>
+          <div class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"></div>
+        </div>
+        <div class="error" id="error" role="alert" hidden>
+          <h2>3D graphics unavailable</h2>
+          <p>This game needs a browser with WebGL 2 and hardware acceleration enabled.</p>
+        </div>
+      </section>
+
+      <footer class="game-footer">
+        <div class="control-hint desktop-hint"><kbd>←</kbd><kbd>→</kbd><span>Hold to steer</span></div>
+        <div class="control-hint desktop-hint"><kbd>Space</kbd><span>Flip</span></div>
+        <div class="control-hint desktop-hint"><kbd>Esc</kbd><span>Pause</span></div>
+        <div class="control-hint touch-hint"><span class="swipe-icon">↔</span><span>Drag to steer</span></div>
+        <button type="button" id="bottomHelp" class="text-btn"><span class="help-sign">?</span> How to play</button>
+      </footer>
+    </main>
+  </div>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
